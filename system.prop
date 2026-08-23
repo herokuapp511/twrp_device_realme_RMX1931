@@ -17,3 +17,9 @@ keymaster_ver=4.0
 ro.adb.secure=0
 ro.board.platform=msmnile
 ro.product.board=msmnile
+
+# USB host/OTG support
+sys.usb.ffs.ready=0
+sys.usb.configfs=1
+persist.sys.usb.config=adb
+service.adb.root=1
