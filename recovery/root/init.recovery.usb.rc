@@ -94,7 +94,13 @@ on boot
     setprop sys.usb.config ${persist.vendor.usb.config}
     setprop sys.usb.configfs 1
 
+# ========================================================
+# None / Teardown
+# ========================================================
 on property:sys.usb.config=none && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/UDC "none"
+    stop adbd
+    setprop sys.usb.ffs.ready 0
     rm /config/usb_gadget/g1/configs/b.1/f1
     rm /config/usb_gadget/g1/configs/b.1/f2
     rm /config/usb_gadget/g1/configs/b.1/f3
@@ -104,11 +110,39 @@ on property:sys.usb.config=none && property:sys.usb.configfs=1
     rm /config/usb_gadget/g1/configs/b.1/f7
     rm /config/usb_gadget/g1/configs/b.1/f8
     rm /config/usb_gadget/g1/configs/b.1/f9
+    setprop sys.usb.state ${sys.usb.config}
 
-on property:sys.usb.config=mtp,adb && property:sys.usb.configfs=1
+# ========================================================
+# ADB Mode (Normal Recovery)
+# ========================================================
+on property:sys.usb.config=adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/UDC "none"
+    setprop sys.usb.ffs.ready 0
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    rm /config/usb_gadget/g1/configs/b.1/f7
+    rm /config/usb_gadget/g1/configs/b.1/f8
+    rm /config/usb_gadget/g1/configs/b.1/f9
+    write /config/usb_gadget/g1/idVendor 0x05C6
+    write /config/usb_gadget/g1/idProduct 0x9091
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f1
     start adbd
 
-on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mtp,adb && property:sys.usb.configfs=1
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+# ========================================================
+# MTP, ADB Mode
+# ========================================================
+on property:sys.usb.config=mtp,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/UDC "none"
+    setprop sys.usb.ffs.ready 0
     write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "mtp_adb"
     rm /config/usb_gadget/g1/configs/b.1/f1
     rm /config/usb_gadget/g1/configs/b.1/f2
@@ -123,13 +157,19 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mtp,adb && property:s
     write /config/usb_gadget/g1/idProduct 0x2774
     symlink /config/usb_gadget/g1/functions/mtp.gs0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
-    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
-    setprop sys.usb.state ${sys.usb.config}
-
-on property:sys.usb.config=adb && property:sys.usb.configfs=1
     start adbd
 
-on property:sys.usb.ffs.ready=1 && property:sys.usb.config=adb && property:sys.usb.configfs=1
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mtp,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+# ========================================================
+# Sideload Mode (Exclusive minadbd)
+# ========================================================
+on property:sys.usb.config=sideload && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/UDC "none"
+    stop adbd
+    setprop sys.usb.ffs.ready 0
     write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
     rm /config/usb_gadget/g1/configs/b.1/f1
     rm /config/usb_gadget/g1/configs/b.1/f2
@@ -143,33 +183,15 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=adb && property:sys.u
     write /config/usb_gadget/g1/idVendor 0x05C6
     write /config/usb_gadget/g1/idProduct 0x9091
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f1
-    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
-    setprop sys.usb.state ${sys.usb.config}
-
-on property:sys.usb.config=sideload && property:sys.usb.configfs=1
-    stop adbd
-
-on property:sys.usb.config=sideload,adb && property:sys.usb.configfs=1
-    stop adbd
 
 on property:sys.usb.ffs.ready=1 && property:sys.usb.config=sideload && property:sys.usb.configfs=1
-    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
-    rm /config/usb_gadget/g1/configs/b.1/f1
-    rm /config/usb_gadget/g1/configs/b.1/f2
-    rm /config/usb_gadget/g1/configs/b.1/f3
-    rm /config/usb_gadget/g1/configs/b.1/f4
-    rm /config/usb_gadget/g1/configs/b.1/f5
-    rm /config/usb_gadget/g1/configs/b.1/f6
-    rm /config/usb_gadget/g1/configs/b.1/f7
-    rm /config/usb_gadget/g1/configs/b.1/f8
-    rm /config/usb_gadget/g1/configs/b.1/f9
-    write /config/usb_gadget/g1/idVendor 0x05C6
-    write /config/usb_gadget/g1/idProduct 0x9091
-    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f1
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
 
-on property:sys.usb.ffs.ready=1 && property:sys.usb.config=sideload,adb && property:sys.usb.configfs=1
+on property:sys.usb.config=sideload,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/UDC "none"
+    stop adbd
+    setprop sys.usb.ffs.ready 0
     write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
     rm /config/usb_gadget/g1/configs/b.1/f1
     rm /config/usb_gadget/g1/configs/b.1/f2
@@ -183,5 +205,7 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=sideload,adb && prope
     write /config/usb_gadget/g1/idVendor 0x05C6
     write /config/usb_gadget/g1/idProduct 0x9091
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f1
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=sideload,adb && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
