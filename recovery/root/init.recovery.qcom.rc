@@ -26,7 +26,6 @@
 #
 
 import /init.recovery.qcom_decrypt.rc
-import /init.recovery.usb.rc
 
 on init
     # Help prepdecrypt align OS version / security patch with system for FBE
@@ -57,11 +56,6 @@ on boot
     start health-hal-2-1
     start vendor.qti.vibrator
     start variant-script
-    # Wake DWC3 USB controller from LPM before gadget bind
-    write /sys/devices/platform/soc/a600000.ssusb/power/control "on"
-    write /sys/devices/platform/soc/a600000.ssusb/a600000.dwc3/power/control "on"
-    # Disable USB autosuspend to prevent LPM re-entry
-    write /sys/devices/platform/soc/a600000.ssusb/power/autosuspend_delay_ms "-1"
-    # Force DWC3 into peripheral mode (vbus_active=true, id_state=FLOAT)
-    write /sys/devices/platform/soc/a600000.ssusb/mode "peripheral"
     setprop sys.usb.config adb
+    write /sys/class/power_supply/usb/otg_switch 1
+    write /proc/touchpanel/tp_fw_update 0
