@@ -52,23 +52,26 @@ on init
     write /config/usb_gadget/g1/os_desc/qw_sign "MSFT100"
     symlink /config/usb_gadget/g1/configs/b.1 /config/usb_gadget/g1/os_desc/b.1
 
-    # Mount FunctionFS for ADB — single mount only (no double mount!)
+    # Mount FunctionFS for ADB — single mount only
     mkdir /dev/usb-ffs 0775 shell shell
     mkdir /dev/usb-ffs/adb 0770 shell shell
     mount functionfs adb /dev/usb-ffs/adb uid=2000,gid=2000
     symlink /dev/mtp_usb /dev/usb_mtp
 
-    # Force DWC3 out of LPM (Low Power Mode) — prevents "Unable to dequeue while in LPM"
+    # Force DWC3 out of LPM and disable autosuspend
     write /sys/devices/platform/soc/a600000.ssusb/power/control "on"
     write /sys/devices/platform/soc/a600000.ssusb/a600000.dwc3/power/control "on"
+    write /sys/devices/platform/soc/a600000.ssusb/power/autosuspend_delay_ms "-1"
 
     setprop sys.usb.configfs 1
 
 on property:ro.boot.usbcontroller=*
     setprop sys.usb.controller ${ro.boot.usbcontroller}
-    # Wait for the UDC sysfs node to appear before any gadget binding
     wait /sys/class/udc/${ro.boot.usbcontroller} 5
 
+# ========================================================
+# config=none → full teardown
+# ========================================================
 on property:sys.usb.config=none && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/UDC "none"
     stop adbd
@@ -86,6 +89,9 @@ on property:sys.usb.config=none && property:sys.usb.configfs=1
 on property:init.svc.adbd=stopped
     setprop sys.usb.ffs.ready 0
 
+# ========================================================
+# Step 1 triggers: start adbd, wait for ffs.ready
+# ========================================================
 on property:sys.usb.config=adb && property:sys.usb.configfs=1
     start adbd
 
@@ -98,9 +104,12 @@ on property:sys.usb.config=sideload && property:sys.usb.configfs=1
 on property:sys.usb.config=sideload,adb && property:sys.usb.configfs=1
     start adbd
 
+# ========================================================
+# Step 2 triggers: ffs.ready=1 → configure gadget & bind UDC (ONE shot)
+# Do NOT write UDC "none" here — that causes BIND→UNBIND loop!
+# UDC is already "none" from init or from config=none teardown.
+# ========================================================
 on property:sys.usb.ffs.ready=1 && property:sys.usb.config=adb && property:sys.usb.configfs=1
-    # Unbind first to ensure clean state
-    write /config/usb_gadget/g1/UDC "none"
     write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
     rm /config/usb_gadget/g1/configs/b.1/f1
     rm /config/usb_gadget/g1/configs/b.1/f2
@@ -108,13 +117,10 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=adb && property:sys.u
     write /config/usb_gadget/g1/idVendor 0x18D1
     write /config/usb_gadget/g1/idProduct 0x4EE7
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f1
-    # Force DWC3 awake before UDC bind
-    write /sys/devices/platform/soc/a600000.ssusb/power/control "on"
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
 
 on property:sys.usb.config=mtp && property:sys.usb.configfs=1
-    write /config/usb_gadget/g1/UDC "none"
     write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "mtp"
     rm /config/usb_gadget/g1/configs/b.1/f1
     rm /config/usb_gadget/g1/configs/b.1/f2
@@ -124,12 +130,10 @@ on property:sys.usb.config=mtp && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/idVendor 0x22D9
     write /config/usb_gadget/g1/idProduct 0x2764
     symlink /config/usb_gadget/g1/functions/mtp.gs0 /config/usb_gadget/g1/configs/b.1/f1
-    write /sys/devices/platform/soc/a600000.ssusb/power/control "on"
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
 
 on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mtp,adb && property:sys.usb.configfs=1
-    write /config/usb_gadget/g1/UDC "none"
     write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "mtp_adb"
     rm /config/usb_gadget/g1/configs/b.1/f1
     rm /config/usb_gadget/g1/configs/b.1/f2
@@ -140,12 +144,10 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mtp,adb && property:s
     write /config/usb_gadget/g1/idProduct 0x2765
     symlink /config/usb_gadget/g1/functions/mtp.gs0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
-    write /sys/devices/platform/soc/a600000.ssusb/power/control "on"
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
 
 on property:sys.usb.ffs.ready=1 && property:sys.usb.config=sideload && property:sys.usb.configfs=1
-    write /config/usb_gadget/g1/UDC "none"
     write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
     rm /config/usb_gadget/g1/configs/b.1/f1
     rm /config/usb_gadget/g1/configs/b.1/f2
@@ -153,12 +155,10 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=sideload && property:
     write /config/usb_gadget/g1/idVendor 0x18D1
     write /config/usb_gadget/g1/idProduct 0x4EE7
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f1
-    write /sys/devices/platform/soc/a600000.ssusb/power/control "on"
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
 
 on property:sys.usb.ffs.ready=1 && property:sys.usb.config=sideload,adb && property:sys.usb.configfs=1
-    write /config/usb_gadget/g1/UDC "none"
     write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
     rm /config/usb_gadget/g1/configs/b.1/f1
     rm /config/usb_gadget/g1/configs/b.1/f2
@@ -166,6 +166,5 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=sideload,adb && prope
     write /config/usb_gadget/g1/idVendor 0x18D1
     write /config/usb_gadget/g1/idProduct 0x4EE7
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f1
-    write /sys/devices/platform/soc/a600000.ssusb/power/control "on"
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
