@@ -36,9 +36,7 @@ on init
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
-    write /sys/class/power_supply/usb/otg_switch 1
     export ANDROID_ROOT /system_root
-    write /sys/class/power_supply/usb/otg_switch 1
 
 service variant-script /system/bin/variant-script.sh
     user root
@@ -57,4 +55,7 @@ service vendor.qti.vibrator /system/bin/vendor.qti.hardware.vibrator.service
 on boot
     start health-hal-2-1
     start vendor.qti.vibrator
+    start variant-script
     setprop sys.usb.config adb
+    write /sys/class/power_supply/usb/otg_switch 1
+    write /proc/touchpanel/tp_fw_update 0

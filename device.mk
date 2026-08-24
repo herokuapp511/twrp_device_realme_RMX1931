@@ -48,3 +48,11 @@ TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES += \
 # Vibrator
 TW_SUPPORT_INPUT_AIDL_HAPTICS := true
 
+# USB OTG host support
+PRODUCT_PACKAGES += \
+    android.hardware.usb@1.0-service
+
+# Health HAL (needed for battery & USB status in TWRP)
+PRODUCT_PACKAGES += \
+    android.hardware.health@2.1-impl \
+    android.hardware.health@2.1-service
