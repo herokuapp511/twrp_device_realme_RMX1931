@@ -11,8 +11,10 @@ PRODUCT_RELEASE_NAME := samurai
 $(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 
-# Inherit from our custom product configuration
-$(call inherit-product, vendor/twrp/config/common.mk)
+# Inherit from custom product configuration
+$(call inherit-product-if-exists, vendor/twrp/config/common.mk)
+$(call inherit-product-if-exists, vendor/fox/config/common.mk)
+$(call inherit-product-if-exists, vendor/omni/config/common.mk)
 
 # Inherit device configuration
 $(call inherit-product, device/realme/samurai/device.mk)

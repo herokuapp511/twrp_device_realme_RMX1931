@@ -1,4 +1,4 @@
-# TWRP Device configuration for realme X2 Pro (samurai / RMX1931)
+# OrangeFox / TWRP Device configuration for realme X2 Pro (samurai / RMX1931)
 
 Branch target: **Android 12–16 FBE** (including Android 16 / 16.2 QPR2 custom ROMs such as LineageOS 23).
 
@@ -7,12 +7,13 @@ Branch target: **Android 12–16 FBE** (including Android 16 / 16.2 QPR2 custom 
 Works:
 - ADB
 - Decryption of `/data` (FBE v2 + metadata encryption + wrappedkey)
-- Screen brightness settings
+- Screen brightness settings & notch alignment
 - Correct screenshot color
 - MTP
-- Flashing (ROMs, images, Magisk, etc.)
+- Flashing (ROMs, images, Magisk, addons, etc.)
 - Backup/Restore
 - USB OTG
+- Realme OZIP flashing support
 
 ## Android 16 decrypt notes
 
@@ -43,41 +44,60 @@ If decrypt still fails, re-extract from the **vendor** partition of that ROM:
 
 Then run `ldcheck` on `$OUT/recovery/root` after build.
 
-### Clean decrypt test
+---
 
-1. Boot TWRP → **Wipe → Format Data** (types `yes`)
-2. Flash ROM → reboot system → set PIN/password
-3. Reboot recovery → enter same PIN → `/data` should mount
+## How to Build OrangeFox Recovery
 
-## Compile
+### 1. Sync OrangeFox Manifest
 
-First checkout minimal TWRP source:
+```bash
+mkdir -p ~/OrangeFox/fox_12.1
+cd ~/OrangeFox/fox_12.1
+repo init --depth=1 -u https://gitlab.com/OrangeFox/manifest.git -b fox_12.1
+repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+```
+
+### 2. Clone Device Tree
+
+```bash
+git clone https://github.com/herokuapp511/twrp_device_realme_RMX1931.git -b fox-12.1-stable device/realme/samurai
+```
+
+### 3. Build OrangeFox
+
+```bash
+source build/envsetup.sh
+lunch fox_samurai-eng # or lunch twrp_samurai-eng / omni_samurai-eng
+mka recoveryimage -j$(nproc --all) # or mka adbd recoveryimage
+```
+
+---
+
+## How to Build TWRP
 
 ```bash
 repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
-repo sync
-git clone https://github.com/zahid5656/twrp_device_realme_RMX1931.git -b twrp-12.1 device/realme/samurai
-```
+repo sync -c -j$(nproc --all)
+git clone https://github.com/herokuapp511/twrp_device_realme_RMX1931.git -b fox-12.1-stable device/realme/samurai
 
-Or use this local tree as `device/realme/samurai`.
-
-Build:
-
-```bash
-. build/envsetup.sh
+source build/envsetup.sh
 lunch twrp_samurai-eng
-mka recoveryimage
+mka recoveryimage -j$(nproc --all)
 ```
 
-Test (do not flash until booted successfully):
+---
+
+## Testing & Installation
+
+Test without flashing:
 
 ```bash
+fastboot boot out/target/product/samurai/OrangeFox-*.img
+# or
 fastboot boot out/target/product/samurai/recovery.img
-# or, depending on PRODUCT_DEVICE:
-fastboot boot out/target/product/RMX1931/recovery.img
 ```
 
-Flash when confirmed:
+Flash when confirmed working:
 
 ```bash
 fastboot flash recovery out/target/product/samurai/recovery.img
@@ -91,3 +111,4 @@ fastboot flash recovery out/target/product/samurai/recovery.img
 - `prepdecrypt.loglevel=2`
 
 Check `/tmp/recovery.log` or `adb shell cat /tmp/recovery.log` after boot.
+

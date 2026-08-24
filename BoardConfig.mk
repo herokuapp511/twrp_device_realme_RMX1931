@@ -99,7 +99,7 @@ TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 
-# Workaround for error copying vendor files to recovery 
+# Workaround for error copying vendor files to recovery
 TARGET_COPY_OUT_ODM := odm
 TARGET_COPY_OUT_VENDOR := vendor
 
@@ -143,8 +143,8 @@ TW_INPUT_BLACKLIST := "hbtp_vm"
 TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
 TW_MAX_BRIGHTNESS := 1023
 TW_DEFAULT_BRIGHTNESS := 200
-TW_Y_OFFSET := 80
-TW_H_OFFSET := -80
+#TW_Y_OFFSET := 80
+#TW_H_OFFSET := -80
 TW_NO_SCREEN_BLANK := true
 TW_EXCLUDE_TWRPAPP := true
 TARGET_USES_MKE2FS := true
@@ -168,3 +168,6 @@ TARGET_USES_LOGD := true
 BUILD_BROKEN_DUP_RULES := true
 BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
 BUILD_BROKEN_MISSING_REQUIRED_MODULES := true
+
+# OrangeFox Configuration
+-include $(DEVICE_PATH)/fox.mk
