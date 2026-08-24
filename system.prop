@@ -1,7 +1,6 @@
 sys.usb.controller=a600000.dwc3
 sys.usb.rndis.func.name=rndis_bam
 sys.usb.rmnet.func.name=rmnet_bam
-persist.sys.isUsbOtgEnabled=true
 
 # Crypto — match Android 12–16 FBE + metadata encryption (dm-default-key)
 ro.crypto.volume.filenames_mode=aes-256-cts

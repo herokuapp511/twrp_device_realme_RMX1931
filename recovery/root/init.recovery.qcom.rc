@@ -37,7 +37,6 @@ on init
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
-    write /sys/class/power_supply/usb/otg_switch 1
     export ANDROID_ROOT /system_root
 
 service variant-script /system/bin/variant-script.sh
