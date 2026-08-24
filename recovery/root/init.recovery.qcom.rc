@@ -62,4 +62,6 @@ on boot
     write /sys/devices/platform/soc/a600000.ssusb/a600000.dwc3/power/control "on"
     # Disable USB autosuspend to prevent LPM re-entry
     write /sys/devices/platform/soc/a600000.ssusb/power/autosuspend_delay_ms "-1"
+    # Force DWC3 into peripheral mode (vbus_active=true, id_state=FLOAT)
+    write /sys/devices/platform/soc/a600000.ssusb/mode "peripheral"
     setprop sys.usb.config adb
