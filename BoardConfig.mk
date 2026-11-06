@@ -146,7 +146,8 @@ TW_MAX_BRIGHTNESS := 1023
 TW_DEFAULT_BRIGHTNESS := 200
 TW_Y_OFFSET := 80
 TW_H_OFFSET := -80
-TW_NO_SCREEN_BLANK := true
+# Disabled for Option 3 test: kernel keeps touch alive across display blank/unblank
+# TW_NO_SCREEN_BLANK := true
 TW_EXCLUDE_TWRPAPP := true
 TARGET_USES_MKE2FS := true
 TW_EXCLUDE_APEX := true

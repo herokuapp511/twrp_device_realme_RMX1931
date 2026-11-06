@@ -95,6 +95,8 @@ on boot
     setprop sys.usb.config adb
     write /sys/class/power_supply/usb/otg_switch 1
     write /proc/touchpanel/tp_fw_update 0
+    # Keep touch alive across display blank/unblank
+    write /proc/touchpanel/no_suspend 1
     # Reduce AW8697 haptic motor gain for gentle button touch vibration
     write /sys/class/leds/vibrator/gain 0x48
     write /sys/class/leds/vibrator/vmax 0x12
