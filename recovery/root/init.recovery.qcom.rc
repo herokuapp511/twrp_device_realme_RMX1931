@@ -99,3 +99,24 @@ on boot
     write /sys/class/leds/vibrator/gain 0x48
     write /sys/class/leds/vibrator/vmax 0x12
 
+    # CPU performance scaling for fast zip decompression & ADB sideload
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor performance
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor performance
+    write /sys/devices/system/cpu/cpu7/cpufreq/scaling_governor performance
+
+    # UFS I/O read-ahead tuning for fast streaming & block write
+    write /sys/block/sda/queue/read_ahead_kb 2048
+    write /sys/block/sdb/queue/read_ahead_kb 2048
+    write /sys/block/sdc/queue/read_ahead_kb 2048
+    write /sys/block/sdd/queue/read_ahead_kb 2048
+    write /sys/block/sde/queue/read_ahead_kb 2048
+    write /sys/block/sdf/queue/read_ahead_kb 2048
+    write /sys/block/sda/queue/nr_requests 256
+    write /sys/block/sdb/queue/nr_requests 256
+    write /sys/block/sdc/queue/nr_requests 256
+    write /sys/block/sdd/queue/nr_requests 256
+    write /sys/block/sde/queue/nr_requests 256
+    write /sys/block/sdf/queue/nr_requests 256
+
+
+

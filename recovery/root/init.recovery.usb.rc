@@ -31,8 +31,11 @@ on boot
     mkdir /config/usb_gadget/g2 0770
     mkdir /config/usb_gadget/g1/strings/0x409 0770
     mkdir /config/usb_gadget/g2/strings/0x409 0770
-    write /config/usb_gadget/g1/bcdUSB 0x0200
-    write /config/usb_gadget/g2/bcdUSB 0x0200
+    # SuperSpeed USB 3.1 Gen 1 for dwc3 controller
+    write /config/usb_gadget/g1/bcdUSB 0x0310
+    write /config/usb_gadget/g2/bcdUSB 0x0310
+    write /config/usb_gadget/g1/bcdDevice 0x0404
+    write /config/usb_gadget/g2/bcdDevice 0x0404
     write /config/usb_gadget/g1/os_desc/use 1
     write /config/usb_gadget/g1/strings/0x409/serialnumber ${ro.serialno}
     write /config/usb_gadget/g2/strings/0x409/serialnumber ${ro.serialno}
