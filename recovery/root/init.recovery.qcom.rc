@@ -94,7 +94,6 @@ on boot
     start variant-script
     setprop sys.usb.config mtp,adb
     write /sys/class/power_supply/usb/otg_switch 1
-    write /proc/touchpanel/tp_fw_update 0
 
     # CPU performance scaling for fast zip decompression & ADB sideload
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor performance
