@@ -31,4 +31,21 @@ resetprop "ro.vendor.build.date.utc" "0000000000"
 resetprop "ro.odm.build.date.utc" "0000000000"
 resetprop "ro.product.build.date.utc" "0000000000"
 
+# Wait for AW8697 haptic driver to complete firmware load (ram_init=1) and set gentle gain
+echo "variant-script: waiting for AW8697 haptic firmware ready..." > /dev/kmsg
+count=0
+while [ $count -lt 30 ]; do
+    if [ -e /sys/class/leds/vibrator/gain ]; then
+        echo 0x30 > /sys/class/leds/vibrator/gain 2>/dev/null
+        curr_gain=$(cat /sys/class/leds/vibrator/gain 2>/dev/null)
+        if [ "$curr_gain" = "0x30" ]; then
+            echo 0x12 > /sys/class/leds/vibrator/vmax 2>/dev/null
+            echo "variant-script: AW8697 gentle haptic gain applied successfully (gain=$curr_gain)" > /dev/kmsg
+            break
+        fi
+    fi
+    count=$((count + 1))
+    sleep 0.25
+done
+
 exit 0
