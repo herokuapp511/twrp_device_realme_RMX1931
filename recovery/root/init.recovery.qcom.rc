@@ -44,13 +44,6 @@ service variant-script /system/bin/variant-script.sh
     disabled
     oneshot
     seclabel u:r:recovery:s0
-    
-# service vendor.qti.vibrator /system/bin/vendor.qti.hardware.vibrator.service
-#     user root
-#     group root
-#     disabled
-#     setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib:/system/lib64:/system/lib:/sbin
-#     seclabel u:r:recovery:s0	
 
 service qseecomd /system/bin/qseecomd
     user root
@@ -90,7 +83,6 @@ on property:sys.listeners.registered=true
 
 on boot
     start health-hal-2-1
-    # start vendor.qti.vibrator
     start variant-script
     setprop sys.usb.config mtp,adb
     write /sys/class/power_supply/usb/otg_switch 1

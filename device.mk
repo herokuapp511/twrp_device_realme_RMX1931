@@ -19,7 +19,7 @@ PRODUCT_SOONG_NAMESPACES += \
 PRODUCT_SHIPPING_API_LEVEL := 28
 
 # Assert
-TARGET_OTA_ASSERT_DEVICE := samurai,RMX1931,RMX1931L1
+TARGET_OTA_ASSERT_DEVICE := samurai,RMX1931,RMX1931L1,RMX1931CN
 
 # Crypto (QCOM FBE via android_device_qcom_twrp-common)
 PRODUCT_PACKAGES += \
@@ -45,8 +45,7 @@ TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES += \
     $(TARGET_OUT_SYSTEM_EXT_SHARED_LIBRARIES)/vendor.display.config@2.0.so \
     $(TARGET_OUT_SYSTEM_EXT_SHARED_LIBRARIES)/libdisplayconfig.qti.so
 
-# Vibrator (Realme X2 Pro uses AW8697 kernel sysfs /sys/class/leds/vibrator/, AIDL causes 5s touch freeze)
-# TW_SUPPORT_INPUT_AIDL_HAPTICS := true
+# Vibrator (Realme X2 Pro uses AW8697 kernel sysfs /sys/class/leds/vibrator/)
 
 # USB OTG host support
 PRODUCT_PACKAGES += \
